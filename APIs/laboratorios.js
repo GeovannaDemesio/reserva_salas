@@ -6,8 +6,7 @@ const router = express.Router();
 router.post('/laboratorio', async (req, res) => {
     const {cod_lab, nome, cap, loc } = req.body;
     try {
-        const client = await pool.connect();
-        await client.query('BEGIN');
+        const client = pool;
 
         // insere na tabela laboratorio
         const querylaboratorio = `
@@ -16,7 +15,6 @@ router.post('/laboratorio', async (req, res) => {
         `;
         await client.query(querylaboratorio, [cod_lab, nome, cap, loc]);
 
-        await client.query('COMMIT'); 
         res.status(201).json({ mensagem: 'Laboratório cadastrado com sucesso!'});
 
     } catch (erro) {
@@ -27,7 +25,7 @@ router.post('/laboratorio', async (req, res) => {
 
 router.get('/laboratorio', async (req, res)=>{ 
     try {
-        const client = await pool.connect();
+        const client = pool; // pool.query libera a conexão sozinho
         const laboratorio = await client.query('SELECT cod_lab, nome, cap, loc  FROM laboratorios');
         res.json(laboratorio.rows)// rows só tras os objetos 
     }catch(erro){
@@ -38,7 +36,7 @@ router.get('/laboratorio', async (req, res)=>{
 
 router.get('/laboratorio/:cod_lab', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool;
         const laboratorio = await client.query('SELECT cod_lab,nome,cap,loc  FROM laboratorios WHERE cod_lab=$1',[req.params.cod_lab]);
         if(!laboratorio){
             return res.status(404) .json({erro: 'Laboratório não encontrado!'})
@@ -54,9 +52,9 @@ router.get('/laboratorio/:cod_lab', async (req,res)=>{
 
 router.put('/laboratorio/:cod_lab', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const {nome,cap,loc} = req.body;
-        const laboratorio = await client.query(`UPDATE laboratorios SET nome=$2,cap=$3,loc=$4  WHERE cod_lab=$1`, [nome,cap,loc,req.params.cod_lab]);
+        const laboratorio = await client.query(`UPDATE laboratorios SET nome=$2,cap=$3,loc=$4  WHERE cod_lab=$1`, [req.params.cod_lab,nome,cap,loc]);
         if(!laboratorio){
             return res.status(404) .json({erro: 'Laboratório não encontrado!'})
         }
@@ -71,7 +69,7 @@ router.put('/laboratorio/:cod_lab', async (req,res)=>{
 
 router.delete('/laboratorio/:cod_lab', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const laboratorio = await client.query('SELECT cod_lab,nome,cap,loc FROM laboratorios WHERE cod_lab = $1',[req.params.cod_lab]);
         if(!laboratorio){
             return res.status(404) .json({erro: 'Laboratório não encontrado!'})

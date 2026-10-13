@@ -6,8 +6,7 @@ const router = express.Router();
 router.post('/sala', async (req, res) => {
     const {cod_sala, nome, cap, loc } = req.body;
     try {
-        const client = await pool.connect();
-        await client.query('BEGIN');
+        const client = pool;
 
         // insere na tabela sala
         const querysala = `
@@ -16,7 +15,6 @@ router.post('/sala', async (req, res) => {
         `;
         await client.query(querysala, [cod_sala, nome, cap, loc]);
 
-        await client.query('COMMIT'); 
         res.status(201).json({ mensagem: 'Sala cadastrada com sucesso!'});
 
     } catch (erro) {
@@ -27,7 +25,7 @@ router.post('/sala', async (req, res) => {
 
 router.get('/sala', async (req, res)=>{ 
     try {
-        const client = await pool.connect();
+        const client = pool; // pool.query libera a conexão sozinho
         const sala = await client.query('SELECT cod_sala, nome, cap, loc  FROM salas');
         res.json(sala.rows)// rows só tras os objetos 
     }catch(erro){
@@ -38,7 +36,7 @@ router.get('/sala', async (req, res)=>{
 
 router.get('/sala/:cod_sala', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const sala = await client.query('SELECT cod_sala,nome,cap,loc  FROM salas WHERE cod_sala=$1',[req.params.cod_sala]);
         if(!sala){
             return res.status(404) .json({erro: 'Sala não encontrada!'})
@@ -55,7 +53,7 @@ router.get('/sala/:cod_sala', async (req,res)=>{
 router.put('/sala/:cod_sala', async (req,res)=>{
     let client;
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const {nome,cap,loc} = req.body;
         const sala = await client.query('UPDATE salas SET nome=$1,cap=$2,loc=$3  WHERE cod_sala=$4', [nome,cap,loc,req.params.cod_sala]);
         if(!sala){
@@ -72,11 +70,10 @@ router.put('/sala/:cod_sala', async (req,res)=>{
 
 router.delete('/sala/:cod_sala', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const sala = await client.query('SELECT cod_sala,nome,cap,loc FROM salas WHERE cod_sala = $1',[req.params.cod_sala]);
         if(!sala){
             return res.status(404) .json({erro: 'Sala não encontrada!'})
-
         } 
         
         await client.query('DELETE FROM salas WHERE cod_sala=$1', [req.params.cod_sala]);

@@ -5,8 +5,9 @@ const router = express.Router();
 // Rota de CADASTRO de Usuário
 router.post('/usuario', async (req, res) => {
     const { nome, cpf, dt_nasc, email, celular, senha } = req.body;
+    let client;
     try {
-        const client = await pool.connect();
+        client = await pool.connect();
         await client.query('BEGIN');
 
         // insere na tabela usuarios
@@ -27,14 +28,17 @@ router.post('/usuario', async (req, res) => {
         res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso!' });
 
     } catch (erro) {
+        if (client) await client.query('ROLLBACK');
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao cadastrar usuário' });
+    } finally {
+        if (client) client.release();
     }
 });
 
 router.get('/usuarios', async (req, res)=>{ 
     try {
-        const client = await pool.connect();
+        const client = pool; // pool.query libera a conexão sozinho
         const usuarios = await client.query('SELECT nome,cpf,dt_nasc,email,celular,senha FROM usuarios');
         res.json(usuarios.rows)// rows só tras os objetos 
     }catch(erro){
@@ -43,10 +47,9 @@ router.get('/usuarios', async (req, res)=>{
 
     }
 })
-//fazer uma rota igual para
 router.get('/usuario/:cpf', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const usuario = await client.query('SELECT nome,cpf,dt_nasc,email,celular FROM usuarios WHERE cpf = $1',[req.params.cpf]);
         if(!usuario){
             return res.status(404) .json({erro: 'Usuário não encontrado!'})
@@ -64,7 +67,7 @@ router.get('/usuario/:cpf', async (req,res)=>{
 
 router.put('/usuario/:cpf', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const {nome,dt_nasc,email,celular} = req.body;
         const usuario = await client.query(`UPDATE usuarios SET nome=$1,dt_nasc=$2,email=$3,celular=$4 WHERE cpf=$5`, [nome,dt_nasc,email,celular,req.params.cpf]);
         if(!usuario){
@@ -81,7 +84,7 @@ router.put('/usuario/:cpf', async (req,res)=>{
 
 router.delete('/usuario/:cpf', async (req,res)=>{
     try {
-        const client = await pool.connect();
+        const client = pool; 
         const usuario = await client.query('SELECT nome,cpf,dt_nasc,email,celular FROM usuarios WHERE cpf = $1',[req.params.cpf]);
         if(!usuario){
             return res.status(404) .json({erro: 'Usuário não encontrado!'})

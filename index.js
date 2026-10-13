@@ -2,6 +2,10 @@ const express = require('express');
 const app= express();
 app.use(express.json())
 
+//login
+const rotaLogin = require('./APIs/login');
+app.use('/post', rotaLogin)
+
 //usuários
 const rotaUsuario = require('./APIs/usuarios');
 app.use('/post', rotaUsuario)

@@ -42,7 +42,6 @@ router.get('/status/:cod_status', async (req,res)=>{
         const status = await client.query('SELECT cod_status,nome,cap,loc  FROM status WHERE cod_status=$1',[req.params.cod_status]);
         if(!status){
             return res.status(404) .json({erro: 'status não encontrada!'})
-
         } 
        
     }catch(erro){
@@ -56,12 +55,12 @@ res.json(statuss.rows)
 router.put('/status/:cod_status', async (req,res)=>{
     try {
         const client = await pool.connect();
-        const {nome,cap,loc} = req.body;
+        const {nome,cap,loc} =req.body;
         const status = await client.query(`UPDATE status SET nome=$2,cap=$3,loc=$4  WHERE cod_status=$1`, [nome,cap,loc,req.params.cod_status]);
         if(!status){
-            return res.status(404) .json({erro: 'status não encontrada!'})
+            return res.status(404)  .json({erro: 'status não encontrada!'})
         }
-        res.json({mensagem: 'status atualizado com sucesso!'})
+        res.json({mensagem:'sstatus atualizado com sucesso!'})
         
     }catch(erro){
         console.error(erro);
