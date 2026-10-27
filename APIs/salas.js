@@ -44,7 +44,7 @@ router.get('/sala/:cod_sala', async (req,res)=>{
         res.json(sala.rows)
     }catch(erro){
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao acessar sala'});
+        res.status(500).json({ erro: 'Erro ao acessar sala1'});
 
     }
     
@@ -63,7 +63,7 @@ router.put('/sala/:cod_sala', async (req,res)=>{
         
     }catch(erro){
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao acessar sala'});
+        res.status(500).json({ erro: 'Erro ao acessar sala2'});
     }
 
 })
@@ -76,6 +76,7 @@ router.delete('/sala/:cod_sala', async (req,res)=>{
             return res.status(404) .json({erro: 'Sala não encontrada!'})
         } 
         
+        await client.query("DELETE FROM reservas WHERE tipo='S' AND cod_recurso=$1", [req.params.cod_sala]);
         await client.query('DELETE FROM salas WHERE cod_sala=$1', [req.params.cod_sala]);
         res.json({mensagem: 'Sala deletada com sucesso!'})
     

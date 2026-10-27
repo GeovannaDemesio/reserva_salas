@@ -76,6 +76,7 @@ router.delete('/laboratorio/:cod_lab', async (req,res)=>{
 
         } 
     
+        await client.query("DELETE FROM reservas WHERE tipo='L' AND cod_recurso=$1", [req.params.cod_lab]);
         await client.query('DELETE FROM laboratorios WHERE cod_lab=$1', [req.params.cod_lab]);
         res.json({mensagem: 'Laboratório deletado com sucesso!'})
     

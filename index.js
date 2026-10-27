@@ -30,6 +30,12 @@ app.use('/get/id', rotaLaboratorios)
 app.use('/put/id', rotaLaboratorios)
 app.use('/delete/id', rotaLaboratorios)
 
+//reservas
+const rotaReserva = require('./APIs/reservas');
+app.use('/post', rotaReserva)
+app.use('/get', rotaReserva)
+app.use('/delete/id', rotaReserva)
+
 app.listen(3001, ()=>{
     console.log('Rodando');
     
